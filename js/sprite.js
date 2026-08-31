@@ -1,370 +1,194 @@
-// Sprite Blocks
+/* SPRITE BLOCKS */
+
+const sprite=(name,c=null)=>getContextSprite(name,c);
+
+const num=(v,d=0,c=null)=>{
+    v=Number(resolveValue(v,c));
+    return Number.isFinite(v)?v:d;
+};
+
+const recordSpriteBlock=(type,data)=>ENGINE.recordBlock(createBlock(type,data));
 
 function createSprite(name){
-    name=resolveValue(name);
-
-    if(!name)
-        return null;
-
-    return ENGINE.sprites[name]||
-        (ENGINE.sprites[name]=new Sprite(name));
+    return recordSpriteBlock("createSprite",{name});
 }
 
+registerBlock("createSprite",async(block,c)=>{
+    const name=String(resolveValue(block.name,c));
+    if(!name)return null;
 
-registerBlock("spriteCostume",async block=>{
-    const name=resolveValue(block.name);
-    const path=resolveValue(block.path);
-    const scale=Number(
-        resolveValue(block.scale)
-    );
+    if(ENGINE.sprites[name])return ENGINE.sprites[name];
 
-    const sprite=ENGINE.sprites[name];
+    const s=new Sprite(name);
+    ENGINE.sprites[name]=s;
+    ENGINE.spriteOrderDirty=true;
+    return s;
+});
 
-    if(!sprite)
-        return;
+registerBlock("spriteCostume",async(block,c)=>{
+    const s=sprite(block.name,c);
+    if(!s)return;
 
-    if(path===""){
-        sprite.setCostume("",scale);
-        sprite.visible=false;
-        sprite.touchable=false;
-    }else{
-        sprite.setCostume(path,scale);
-        sprite.visible=true;
-        sprite.touchable=true;
+    const path=resolveValue(block.path,c);
+    const scale=num(block.scale,1,c);
+
+    s.setCostume(path,scale);
+    s.visible=!!path;
+    s.touchable=!!path;
+    ENGINE.spriteOrderDirty=true;
+});
+
+registerBlock("spriteSetSize",async(block,c)=>{
+    const s=sprite(block.name,c);
+    if(s)s.setScale(Math.max(0.01,num(block.scale,1,c)));
+});
+
+registerBlock("spriteChangeSize",async(block,c)=>{
+    const s=sprite(block.name,c);
+    if(s)s.setScale(Math.max(0.01,s.scale+num(block.amount,0,c)));
+});
+
+registerBlock("spriteEffect",async(block,c)=>{
+    const s=sprite(block.name,c);
+    if(!s)return;
+
+    const effect=String(resolveValue(block.effect,c)).toLowerCase();
+
+    if(effect==="brightness")
+        s.effects.brightness=Math.max(-100,Math.min(100,num(block.value,0,c)));
+
+    else if(effect==="ghost"||effect==="color")
+        s.effects[effect]=Math.max(0,Math.min(100,num(block.value,0,c)));
+});
+
+registerReporter("costumeOfSprite",(value,c)=>
+    sprite(value.name,c)?.costume??""
+);
+
+registerReporter("sizeOfSprite",(value,c)=>
+    sprite(value.name,c)?.scale??0
+);
+
+registerBlock("spriteShow",async(block,c)=>{
+    const s=sprite(block.name,c);
+    if(s){
+        s.visible=true;
+        ENGINE.spriteOrderDirty=true;
     }
 });
 
-
-registerBlock("spriteSetSize",async block=>{
-    const sprite=ENGINE.sprites[
-        resolveValue(block.name)
-    ];
-
-    if(!sprite)
-        return;
-
-    let scale=Number(
-        resolveValue(block.scale)
-    );
-
-    if(!Number.isFinite(scale)||scale<=0)
-        scale=1;
-
-    sprite.setScale(scale);
-});
-
-
-registerBlock("spriteChangeSize",async block=>{
-    const sprite=ENGINE.sprites[
-        resolveValue(block.name)
-    ];
-
-    if(!sprite)
-        return;
-
-    let amount=Number(
-        resolveValue(block.amount)
-    );
-
-    if(!Number.isFinite(amount))
-        amount=0;
-
-    sprite.setScale(
-        Math.max(
-            0.01,
-            sprite.scale+amount
-        )
-    );
-});
-
-
-registerBlock("spriteEffect",async block=>{
-    const sprite=ENGINE.sprites[
-        resolveValue(block.name)
-    ];
-
-    if(!sprite)
-        return;
-
-    const effect=String(
-        resolveValue(block.effect)
-    ).toLowerCase();
-
-    let value=Number(
-        resolveValue(block.value)
-    );
-
-    if(!Number.isFinite(value))
-        value=0;
-
-    value=Math.max(
-        0,
-        Math.min(100,value)
-    );
-
-    if(effect==="brightness"){
-        sprite.effects.brightness=value;
-    }else if(effect==="ghost"){
-        sprite.effects.ghost=value;
-    }else if(effect==="color"){
-        sprite.effects.color=value;
+registerBlock("spriteHide",async(block,c)=>{
+    const s=sprite(block.name,c);
+    if(s){
+        s.visible=false;
+        ENGINE.spriteOrderDirty=true;
     }
 });
 
+registerBlock("spriteLayer",async(block,c)=>{
+    const s=sprite(block.name,c);
+    if(!s)return;
 
-registerReporter("costumeOfSprite",value=>{
-    const sprite=ENGINE.sprites[
-        resolveValue(value.name)
-    ];
-
-    return sprite?.costume??"";
+    s.layer=num(block.layer,0,c);
+    ENGINE.spriteOrderDirty=true;
 });
 
+registerBlock("goFront",async(block,c)=>{
+    const s=sprite(block.name,c);
+    if(!s)return;
 
-registerReporter("sizeOfSprite",value=>{
-    const sprite=ENGINE.sprites[
-        resolveValue(value.name)
-    ];
-
-    return sprite?.scale??0;
-});
-
-
-registerBlock("spriteShow",async block=>{
-    const sprite=ENGINE.sprites[
-        resolveValue(block.name)
-    ];
-
-    if(sprite)
-        sprite.visible=true;
-});
-
-
-registerBlock("spriteHide",async block=>{
-    const sprite=ENGINE.sprites[
-        resolveValue(block.name)
-    ];
-
-    if(sprite)
-        sprite.visible=false;
-});
-
-
-registerBlock("spriteLayer",async block=>{
-    const sprite=ENGINE.sprites[
-        resolveValue(block.name)
-    ];
-
-    if(!sprite)
-        return;
-
-    let layer=Number(
-        resolveValue(block.layer)
-    );
-
-    if(!Number.isFinite(layer))
-        layer=0;
-
-    sprite.layer=layer;
-});
-
-
-registerBlock("goFront",async block=>{
-    const sprite=ENGINE.sprites[
-        resolveValue(block.name)
-    ];
-
-    if(!sprite)
-        return;
-
-    const sprites=Object.values(
-        ENGINE.sprites
-    );
-
-    const highest=sprites.reduce(
-        (max,item)=>
-            Math.max(max,item.layer),
+    s.layer=Math.max(
+        ...getAllSprites().map(x=>x.layer),
         0
-    );
+    )+1;
 
-    sprite.layer=highest+1;
+    ENGINE.spriteOrderDirty=true;
 });
 
+registerBlock("goBack",async(block,c)=>{
+    const s=sprite(block.name,c);
+    if(!s)return;
 
-registerBlock("goBack",async block=>{
-    const sprite=ENGINE.sprites[
-        resolveValue(block.name)
-    ];
-
-    if(!sprite)
-        return;
-
-    const sprites=Object.values(
-        ENGINE.sprites
-    );
-
-    const lowest=sprites.reduce(
-        (min,item)=>
-            Math.min(min,item.layer),
+    s.layer=Math.min(
+        ...getAllSprites().map(x=>x.layer),
         0
-    );
+    )-1;
 
-    sprite.layer=lowest-1;
+    ENGINE.spriteOrderDirty=true;
 });
 
+registerBlock("deleteSprite",async(block,c)=>{
+    const name=String(resolveValue(block.name,c));
+    if(!name)return;
 
-registerBlock("deleteSprite",async block=>{
-    const name=resolveValue(block.name);
-
-    if(!name)
-        return;
+    const s=ENGINE.sprites[name];
+    if(!s)return;
 
     delete ENGINE.sprites[name];
+
+    s.deleted=true;
+    s.visible=false;
+
+    ENGINE.spriteOrder=ENGINE.spriteOrder.filter(x=>x!==s);
+    ENGINE.spriteOrderDirty=true;
 });
 
 
-function recordSpriteBlock(type,data){
-    const block=createBlock(
-        type,
-        data
-    );
+/* SPRITE API */
 
-    ENGINE.recordBlock(block);
-
-    return block;
+function createSpriteBlock(type,data){
+    return recordSpriteBlock(type,data);
 }
-
 
 function spriteCostume(name,path,scale=1){
-    if(arguments.length===1){
-        return costumeOfSprite(name);
-    }
-
-    return recordSpriteBlock(
-        "spriteCostume",
-        {
-            name,
-            path,
-            scale
-        }
-    );
+    return arguments.length===1
+        ?costumeOfSprite(name)
+        :createSpriteBlock("spriteCostume",{name,path,scale});
 }
-
 
 function spriteSetSize(name,scale){
-    if(arguments.length===1){
-        return sizeOfSprite(name);
-    }
-
-    return recordSpriteBlock(
-        "spriteSetSize",
-        {
-            name,
-            scale
-        }
-    );
+    return arguments.length===1
+        ?sizeOfSprite(name)
+        :createSpriteBlock("spriteSetSize",{name,scale});
 }
-
 
 function spriteChangeSize(name,amount){
-    return recordSpriteBlock(
-        "spriteChangeSize",
-        {
-            name,
-            amount
-        }
-    );
+    return createSpriteBlock("spriteChangeSize",{name,amount});
 }
-
 
 function spriteEffect(name,effect,value){
-    return recordSpriteBlock(
-        "spriteEffect",
-        {
-            name,
-            effect,
-            value
-        }
-    );
+    return createSpriteBlock("spriteEffect",{name,effect,value});
 }
-
 
 function costumeOfSprite(name){
-    return createReporter(
-        "costumeOfSprite",
-        {
-            name
-        }
-    );
+    return createReporter("costumeOfSprite",{name});
 }
-
 
 function sizeOfSprite(name){
-    return createReporter(
-        "sizeOfSprite",
-        {
-            name
-        }
-    );
+    return createReporter("sizeOfSprite",{name});
 }
-
 
 function spriteShow(name){
-    return recordSpriteBlock(
-        "spriteShow",
-        {
-            name
-        }
-    );
+    return createSpriteBlock("spriteShow",{name});
 }
-
 
 function spriteHide(name){
-    return recordSpriteBlock(
-        "spriteHide",
-        {
-            name
-        }
-    );
+    return createSpriteBlock("spriteHide",{name});
 }
-
 
 function spriteLayer(name,layer){
-    return recordSpriteBlock(
-        "spriteLayer",
-        {
-            name,
-            layer
-        }
-    );
+    return createSpriteBlock("spriteLayer",{name,layer});
 }
-
 
 function goFront(name){
-    return recordSpriteBlock(
-        "goFront",
-        {
-            name
-        }
-    );
+    return createSpriteBlock("goFront",{name});
 }
-
 
 function goBack(name){
-    return recordSpriteBlock(
-        "goBack",
-        {
-            name
-        }
-    );
+    return createSpriteBlock("goBack",{name});
 }
-
 
 function deleteSprite(name){
-    return recordSpriteBlock(
-        "deleteSprite",
-        {
-            name
-        }
-    );
+    return createSpriteBlock("deleteSprite",{name});
 }
+

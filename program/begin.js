@@ -1,47 +1,67 @@
-// <----- Canvas Blocks ----->
+// Start of Code Blocks.
 
-canvasColor("#686565");
-canvasCostume("images/sample_canvas.png", 2);
 
-createSprite(join("Kni", "ght"));
-spriteCostume("Knight","images/sample_sprite.png", 1);
+// Main Menu
+// Example is used in the Mystical Legends Game - https://mysticallegends.org
 
-moveTo("Knight", 0, 0);
+whenBroadcast("Main Menu",
+    canvasColor("#000000"), canvasCostume("images/menu/BG1-1.svg", 1),
+    spriteCostume("Line", "images/menu/BG1-4.svg", 4),
+    createSprite("Heroes"), spriteCostume("Heroes", "images/menu/BG1-3.svg", 2.2),
+    createSprite("Logo"), spriteCostume("Logo", "/images/mlg-assets/mlg-logo.png", 0.8),
+    createSprite("Overlay"), spriteCostume("Overlay", "images/menu/BG1-2.svg", 4),
 
-let danceStep=0;
+    moveTo("Heroes", 75, 0),
+    moveToEdge("Logo", "left", 40, "top", 30),
 
-whenBroadcast("MovePosition",
+    ifBlock( equal(isMobile(), true),
+        moveToEdge("Logo", "", 0, "top", 30),
+        deleteSprite("Heroes"),
+    ),
+
+    makeSound("mlt", "/images/mlg-assets/Music/ML-Theme.mp3"),
+    playSound("mlt"),
     forever(
-        moveTo("Knight", mouseX(), mouseY()),
-    )
+        glideTo("Heroes", 80, 5, 0.4),
+        glideTo("Heroes", 70, -5, 0.4),
+    ),
 );
 
-whenBroadcast("ColorChange",
+whenBroadcast("Main Menu",
     forever(
-        ifBlock( and( lThan(abs(spriteX("Knight")), 30), lThan(abs(spriteY("Knight")), 30) ),
-            spriteEffect("Knight", "color", 25),
-            spriteCostume("Knight","images/sample_sprite.png", 2),
-            spriteEffect("Knight", "ghost", 50),
-            spriteEffect("Knight", "brightness", 50),
-            ifBlock( equal(costumeOfSprite("Knight"), "images/sample_sprite.png"),
-                facing("Knight", "down"),
-            ),
-        )
-    )
+        createSprite("Line"),
+        spriteCostume("Line", "images/menu/BG1-4.svg", 1),
+        moveTo("Line", -400, -400),
+        makeClone("Line"),
+        wait(0.12),
+    ),
 );
 
-makeSound("MLTheme", "https://mysticallegends.org/images/mlg-assets/Music/ML-Theme.mp3");
-setVolume("MLTheme", 100);
-setPitch("MLTheme", 25);
-setPan("MLTheme", 0);
-playSound("MLTheme");
+whenClone("Line",
+    moveTo("Line", -300, mult(round(randomNum(-35, 3)), 10)),
+    goBack("Line"),
+    spriteSetSize("Line", randomNum(0.3, 0.5)),
+    ifBlock( gEqThan(spriteY("Line"), -200),
+        spriteEffect("Line", "brightness", mult(div(abs(spriteY("Line")), 100), 15)),
+        "else",
+        ifBlock( lEqThan(spriteY("Line"), -200 ),
+            spriteEffect("Line", "brightness", mult(div(abs(spriteY("Line")), -100), 15)),
+        ),
+    ),
+    direction("Line", 335),
+    repeat(80,
+        moveBy("Line", mult(17, cos(20)), mult(17, sin(20))),
+        ifBlock( gThan(spriteX("Line"), 280),
+            deleteClone("Line"),
+        ),
+        wait(0.02),
+    ),
+    deleteClone("Line"),
+)
 
-whenBroadcast("End",
-    deleteSprite("Knight"),
-);
 
-broadcast("MovePosition");
-broadcast("ColorChange");
 
-facing("Knight", "up");
-canvasEffect("color", 10);
+
+loadPlayerData();
+
+broadcast("Main Menu");

@@ -63,6 +63,10 @@ moveToEdge("Player1", "left", 30, "top", 30); // Moves to a flex coordinate, alw
 
 moveTo("Player1", 0, 0); // Moves a sprite to coordinate. Parameter: sprite_name, x, y
 
+moveBy("Player1", 3, 3); // Moves a sprite by the x and y value.
+
+isMobile(); // Returns if view is mobile, then true, else false.
+
 moveToSprite("Player1", "Enemy1"); // Moves first sprite to second sprite immediatly.
 
 facing("Player1", "left"); // Changes and flips sprite facing direction. Left, right, up, and down.
@@ -83,8 +87,11 @@ add(1, 2); // example, to get 3
 sub(5, 4); // example, to get 1
 mult(2, 2); // example, to get 4
 div(10, 2); // example, to get 5
-mod(5, 2); // example, to get 1
-round(0.6); // example, to get 1
+mod(5, 2); // example, to get 1, remainder
+round(0.6); // example, to get 1, round
+abs(-3); // example, to get 3, absolute value
+sin(30); 
+cos(30); 
 randomNum(1, 10); // to get a random number between 1 and 10
 
 // These are boolean conditions which can compare values. Can support variables as well.
@@ -122,6 +129,8 @@ makeSpriteVar("Player1", "health"); // Set private variables to sprites.
 setSpriteVar("Player1", "health", 1);
 changeSpriteVarBy("Player1", "health", 3); 
 getSpriteVar("Player1", "health"); 
+
+deleteVar("var1")/ // Deletes a variable.
 
 
 // <----- Sensing Blocks ----->
@@ -204,16 +213,20 @@ whenBroadcast("Start Menu",
 );
 
 
-// <----- Function Blocks ----->
+// <----- Clone Blocks ----->
 
-// Parameters in function blocks will not work as they are not variable blocks. 
-// All variables are inherently global, but you can set one private variable's value by another private variable easily using blocks.
-testFunc(); // Declare a function
+makeClone("Player1"); // Creates 1 one of the sprite and inherits all of the sprite's current attributes.
 
-// Function body, takes the value parameter in function and assigns to variables in order.
-function testFunc(){
+// Creates a broadcast instance where clones will run code on creation.
+whenClone("Player1", 
     //field;
-}; 
+)
+
+deleteClone("Player1"); // When used inside whenClone(), it deletes that clone.
+
+getCloneName(); // When used inside whenClone(), it gets the clone's own name.
+
+getCloneId(); // When used inside whenClone(), it gets the clone's own id.
 
 
 // <----- Sound Blocks -----> // Must intereact with screen to begin any sound on a project start.
@@ -237,3 +250,22 @@ setVolume("Sound", 100); // Sets the sound's volume, where 100 is the sound's re
 changeVolume("Sound", 1); // Changes sound's volume by an amount, either positive or negative.
 
 volumeOfSound("Sound"); // Returns the volume of a particular sound.
+
+
+
+
+
+// Others
+
+// <----- Data Blocks ----->
+
+
+
+getUsername(); // Returns signed in username.
+
+getLoggedIn(); // Returns whether a user is signed in.
+
+getData("silver_coin"); // Gets value in dictionary.
+
+updateData("silver_coin", 100); // Updates value in dictionary.
+
