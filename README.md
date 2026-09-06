@@ -8,7 +8,7 @@ While Scratch focuses on visual block programming, JScratch takes the same appro
 
 Wtih all Scratch driven visuals encoded into a .js format, one can take a step into easing into the web development sphere. Beside the basic Scratch blocks, several additional blocks centered on manipulating css styles and retrieving internet items are built-in. Even more code blocks will be added in the future, but user-made codes are also supported.
 
-For setup, simply download this entire repo file, place it into your favorite code editor (strongly suggest VS Code), install the Go Live extention, and deploy and run on your local desktop.
+For setup, simply download this entire repo file, place it into your favorite code editor (strongly suggest VS Code), install the Go Live extention, and deploy and run on your local desktop. The canvas.html is the file where you can begin and "Go Live" to visualize the begin.js sample that was created. If you're familiar with html, you can modify this file to take other .js files as you see fit.
 
 > **JScratch is Scratch-inspired programming taken to another level — built for the web first.**
 
