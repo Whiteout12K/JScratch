@@ -33,10 +33,12 @@ spriteChangeSize("Player1", 0.1); // Changes sprite scale by value, can be both 
 
 spriteEffect("Player1", "brightness", 0); // Changes a sprite's effect, where 0 is none and 100 is 100% effect.
 //  Effect List: 
-//    brightness: changes sprite costume brightness, from 0-100%, where max is bright white.
+//    brightness: changes sprite costume brightness, from -100 to 100, where max 100 on either side is bright white or darkness.
 //    ghost: changes the sprite's opacity, from 0-100%.
 //    color: changes the sprite's color, from 0-100. 0 is default, and 100 is also default. In between, the sprite goes through the color spectrum.
 //           This basically changes the hue of the colors.
+
+spriteChangeEffect("Player1", "brightness", 10); // Changes a sprite's effect by value, can be both negative or positive to shrink or grow effect.
 
 spriteShow("Player1"); // Shows the sprite
 
@@ -50,6 +52,12 @@ costumeOfSprite("Player1"); // Returns the current costume path of sprite.
 sizeOfSprite("Player1"); // Returns the current sprite size.
 
 deleteSprite("Player1"); // Completely removes sprite.
+
+deleteAllSprites(); // Completely removes all current sprites and clones from canvas.
+
+phaseIn(0.3); // Fades all current sprites in over time. Parameter: time (in seconds)
+phaseOut(0.3); // Fades all current sprites out over time. Parameter: time (in seconds)
+//                Good practice is to delete unused sprites between scenes.
 
 
 // <----- Motion Blocks ----->
@@ -169,11 +177,9 @@ wait(1); // Wait for a certain amount of time. Parameter: number is in seconds a
 
 // Repeats a certain amount of times. Parameter: repeat_number.
 //   Can place additioanl code inside or more repeat. Nested repeat does not need ENGINE.scripts.push()
-ENGINE.scripts.push(
-    repeat(100,
-        //field,
-    )
-);
+repeat(100,
+    //field,
+)
 
 // Conditional if block that checks of if a conditonal is true and then executes.
 //  Also can use "else" which is optional to run if conditonal is false.
@@ -259,7 +265,7 @@ volumeOfSound("Sound"); // Returns the volume of a particular sound.
 
 // <----- Data Blocks ----->
 
-
+loadPlayerData();
 
 getUsername(); // Returns signed in username.
 
