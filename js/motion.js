@@ -30,23 +30,9 @@ function setupEdgeLock(s,horizontal,hDistance,vertical,vDistance){
     horizontal=String(horizontal??"").toLowerCase();
     vertical=String(vertical??"").toLowerCase();
 
-    const vw=ENGINE.viewWidth/2;
-    const vh=ENGINE.viewHeight/2;
-    const cx=ENGINE.camera.x;
-    const cy=ENGINE.camera.y;
-    const left=cx-vw;
-    const right=cx+vw;
-    const bottom=cy-vh;
-    const top=cy+vh;
-
     hDistance=Math.max(0,Number(hDistance)||0);
     vDistance=Math.max(0,Number(vDistance)||0);
 
-    /*
-     * Edge distance is measured to the SPRITE CENTER.
-     * This is deliberately independent of width/height so resizing
-     * never changes the sprite's center position.
-     */
     s.edgeLock={
         horizontal,
         horizontalDistance:hDistance,
@@ -54,16 +40,6 @@ function setupEdgeLock(s,horizontal,hDistance,vertical,vDistance){
         verticalDistance:vDistance,
         mobile:false
     };
-
-    if(horizontal==="left")
-        s.x=left+hDistance;
-    else if(horizontal==="right")
-        s.x=right-hDistance;
-
-    if(vertical==="top")
-        s.y=top-vDistance;
-    else if(vertical==="bottom")
-        s.y=bottom+vDistance;
 
     updateEdgeSprite(s);
 }
@@ -138,21 +114,11 @@ async function glideSprite(s,x,y,time,context){
         return;
     }
 
-    const sx=s.x,sy=s.y,start=performance.now(),duration=time*1000;
-
-    await new Promise(resolve=>{
-        const animate=now=>{
-            if(!ENGINE.running||context.ended)return resolve();
-
-            const p=Math.min(1,(now-start)/duration);
-            s.x=sx+(x-sx)*p;
-            s.y=sy+(y-sy)*p;
-
-            if(p>=1)return resolve();
-            requestAnimationFrame(animate);
-        };
-        requestAnimationFrame(animate);
-    });
+    const sx=s.x,sy=s.y,start=ENGINE.clock,duration=time*1000;
+    while(contextActive(context)){
+        const progress=Math.min(1,(ENGINE.clock-start)/duration);s.x=sx+(x-sx)*progress;s.y=sy+(y-sy)*progress;
+        if(progress>=1)break;await runtimeWait(0,context,true);
+    }
 }
 
 registerBlock("glideTo",async(block,c)=>{
